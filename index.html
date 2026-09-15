@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#4a7c3f" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="金币小人" />
+<title>像素金币小人</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- 开始菜单 -->
+<div id="menu-screen" class="screen">
+  <div class="menu-panel">
+    <div class="menu-title">
+      <span class="title-line">像素农场</span>
+      <span class="title-sub">吃金币大冒险</span>
+    </div>
+    <div class="coin-icon-deco"></div>
+    <button id="btn-start" class="menu-btn">开始游戏</button>
+    <button id="btn-exit" class="menu-btn menu-btn-secondary">退出</button>
+  </div>
+</div>
+
+<!-- 退出提示（H5无法真正退出，给出提示） -->
+<div id="exit-screen" class="screen hidden">
+  <div class="menu-panel">
+    <div class="menu-title"><span class="title-line">再见！</span></div>
+    <p class="exit-text">感谢游玩，关闭此页面即可退出。</p>
+    <button id="btn-back-to-menu" class="menu-btn">返回菜单</button>
+  </div>
+</div>
+
+<!-- 游戏主界面 -->
+<div id="game-screen" class="screen hidden">
+  <div id="hud">
+    <div id="coin-counter">
+      <span class="coin-icon"></span>
+      <span id="coin-count">0</span>
+    </div>
+    <button id="btn-quit" aria-label="返回菜单">菜单</button>
+  </div>
+
+  <canvas id="game-canvas"></canvas>
+
+  <!-- 虚拟方向键 -->
+  <div id="dpad">
+    <button id="dpad-up" class="dpad-btn dpad-up" aria-label="上">▲</button>
+    <button id="dpad-left" class="dpad-btn dpad-left" aria-label="左">◀</button>
+    <button id="dpad-right" class="dpad-btn dpad-right" aria-label="右">▶</button>
+    <button id="dpad-down" class="dpad-btn dpad-down" aria-label="下">▼</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

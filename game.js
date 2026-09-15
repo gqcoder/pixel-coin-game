@@ -258,11 +258,11 @@
     ctx.fillStyle = '#c4a57b'; // 更浅的棕色土地
     ctx.fillRect(0, 0, W, H);
     
-    // 上方：相框 + 图片（紧凑布局）
-    var frameW = Math.min(W * 0.62, H * 0.35); // 相框宽度
+    // 上方：相框 + 图片（增大比例）
+    var frameW = Math.min(W * 0.75, H * 0.48); // 相框宽度增大
     var frameH = frameW * 0.75; // 相框高度（4:3 比例）
     var frameX = (W - frameW) / 2; // 居中
-    var frameY = H * 0.08; // 距离顶部 8%
+    var frameY = H * 0.05; // 距离顶部 5%
     
     if (picImage && picImage.complete) {
       // 相框外框（深棕色木纹效果）
@@ -336,32 +336,32 @@
     ctx.lineWidth = 3;
     ctx.stroke();
     
-    // 绘制可爱的装饰元素（气球）
-    var decorSize = Math.floor(Math.min(W * 0.06, 24));
+    // 绘制可爱的装饰元素（气球，缩小）
+    var decorSize = Math.floor(Math.min(W * 0.04, 16));
     ctx.font = decorSize + 'px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('🎈', W * 0.12, bubbleY + bubbleH * 0.3); // 左侧气球
-    ctx.fillText('🎈', W * 0.88, bubbleY + bubbleH * 0.3); // 右侧气球
+    ctx.fillText('🎈', W * 0.14, bubbleY + bubbleH * 0.3); // 左侧气球
+    ctx.fillText('🎈', W * 0.86, bubbleY + bubbleH * 0.3); // 右侧气球
     
-    // 绘制"生日快乐"两行大字（完全居中对齐）
-    var fontSize = Math.floor(Math.min(W * 0.16, H * 0.09));
+    // 绘制"生日快乐"两行大字（完全居中对齐，缩小比例）
+    var fontSize = Math.floor(Math.min(W * 0.11, H * 0.06));
     
     // 第一行：生日
     ctx.fillStyle = '#ff6b9d'; // 可爱粉色
     ctx.font = 'bold ' + fontSize + 'px "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('生日', W / 2, bubbleY + bubbleH * 0.35);
+    ctx.fillText('生日', W / 2, bubbleY + bubbleH * 0.32);
     
     // 第二行：快乐
     ctx.fillStyle = '#ff4757'; // 红色喜庆
     ctx.font = 'bold ' + fontSize + 'px "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif';
-    ctx.fillText('快乐', W / 2, bubbleY + bubbleH * 0.58);
+    ctx.fillText('快乐', W / 2, bubbleY + bubbleH * 0.56);
     
-    // 蛋糕 emoji（单独居中放在最下方）
-    ctx.font = (fontSize * 1.2) + 'px sans-serif';
-    ctx.fillText('🎂', W / 2, bubbleY + bubbleH * 0.82);
+    // 蛋糕 emoji（单独居中放在最下方，缩小）
+    ctx.font = (fontSize * 0.9) + 'px sans-serif';
+    ctx.fillText('🎂', W / 2, bubbleY + bubbleH * 0.80);
   }
 
   function drawCar() {

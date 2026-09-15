@@ -73,6 +73,7 @@
   var lastTime = 0;
   var rafId = null;
   var running = false;
+  var picImage = null; // 加载的图片
 
   function resetGame() {
     car = {
@@ -257,17 +258,67 @@
     ctx.fillStyle = '#c4a57b'; // 更浅的棕色土地
     ctx.fillRect(0, 0, W, H);
     
-    // 绘制"生日快乐"两行大字（深棕色）
+    // 上方：相框 + 图片（占屏幕上半部分）
+    if (picImage && picImage.complete) {
+      var frameW = Math.min(W * 0.7, H * 0.45); // 相框宽度
+      var frameH = frameW * 0.75; // 相框高度（4:3 比例）
+      var frameX = (W - frameW) / 2; // 居中
+      var frameY = H * 0.15; // 距离顶部 15%
+      
+      // 相框外框（深棕色木纹效果）
+      var frameBorder = 12;
+      ctx.fillStyle = '#4a2f1a'; // 深棕色木纹
+      ctx.fillRect(frameX - frameBorder, frameY - frameBorder, 
+                   frameW + frameBorder * 2, frameH + frameBorder * 2);
+      
+      // 相框内框（浅金色装饰边）
+      var innerBorder = 6;
+      ctx.fillStyle = '#d4af37'; // 金色
+      ctx.fillRect(frameX - innerBorder, frameY - innerBorder, 
+                   frameW + innerBorder * 2, frameH + innerBorder * 2);
+      
+      // 图片区域（白色背景）
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(frameX, frameY, frameW, frameH);
+      
+      // 绘制图片（等比缩放填充相框）
+      var imgRatio = picImage.width / picImage.height;
+      var frameRatio = frameW / frameH;
+      var drawW, drawH, drawX, drawY;
+      
+      if (imgRatio > frameRatio) {
+        // 图片更宽，以高度为准
+        drawH = frameH;
+        drawW = drawH * imgRatio;
+        drawX = frameX - (drawW - frameW) / 2;
+        drawY = frameY;
+      } else {
+        // 图片更高，以宽度为准
+        drawW = frameW;
+        drawH = drawW / imgRatio;
+        drawX = frameX;
+        drawY = frameY - (drawH - frameH) / 2;
+      }
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(frameX, frameY, frameW, frameH);
+      ctx.clip();
+      ctx.drawImage(picImage, drawX, drawY, drawW, drawH);
+      ctx.restore();
+    }
+    
+    // 下方：绘制"生日快乐"两行大字（深棕色）
     ctx.fillStyle = '#5a3b1f'; // 深棕色
-    var fontSize = Math.floor(Math.min(W * 0.22, H * 0.15));
+    var fontSize = Math.floor(Math.min(W * 0.22, H * 0.12));
     ctx.font = 'bold ' + fontSize + 'px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // 第一行：生日
-    ctx.fillText('生日', W / 2, H * 0.42);
-    // 第二行：快乐！
-    ctx.fillText('快乐！', W / 2, H * 0.58);
+    // 第一行：生日（屏幕下半部分靠上）
+    ctx.fillText('生日', W / 2, H * 0.72);
+    // 第二行：快乐！（紧贴第一行下方）
+    ctx.fillText('快乐！', W / 2, H * 0.85);
   }
 
   function drawCar() {
@@ -396,6 +447,13 @@
   // ---------- 初始化 ----------
   resizeCanvas();
   showScreen('menu');
+  
+  // 加载图片
+  picImage = new Image();
+  picImage.src = 'pics/hbd_pics.jpg';
+  picImage.onerror = function() {
+    console.warn('图片加载失败，将不显示相框');
+  };
 
   // ---------- 注册 Service Worker（PWA 离线支持） ----------
   if ('serviceWorker' in navigator) {

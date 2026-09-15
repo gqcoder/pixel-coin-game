@@ -25,6 +25,8 @@
   var scratchCtx = scratchCanvas.getContext('2d');
   var progressEl = document.getElementById('scratch-progress');
   var dpad = {
+    up: document.getElementById('dpad-up'),
+    down: document.getElementById('dpad-down'),
     left: document.getElementById('dpad-left'),
     right: document.getElementById('dpad-right')
   };
@@ -67,7 +69,7 @@
   // ---------- 游戏状态 ----------
   var car = null; // { x, y, animT }
   var scratchedPixels = 0; // 已刮开的像素数
-  var keys = { left: false, right: false };
+  var keys = { up: false, down: false, left: false, right: false };
   var lastTime = 0;
   var rafId = null;
   var running = false;
@@ -75,15 +77,38 @@
   function resetGame() {
     car = {
       x: W / 2,
-      y: H * 0.65, // 小车在下方
+      y: H / 2,
       animT: 0
     };
     
-    // 初始化刮刮卡遮罩（全是草地覆盖）
-    scratchCtx.fillStyle = '#4a9c3f';
-    scratchCtx.fillRect(0, 0, W, H);
+    // 初始化刮刮卡遮罩（星露谷风格草地）
+    drawGrassOverlay();
     scratchedPixels = 0;
     updateProgress();
+  }
+  
+  // 绘制星露谷风格草地遮罩
+  function drawGrassOverlay() {
+    var cols = Math.ceil(W / TILE) + 1;
+    var rows = Math.ceil(H / TILE) + 1;
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var even = (r + c) % 2 === 0;
+        scratchCtx.fillStyle = even ? '#4a9c3f' : '#458f3a';
+        scratchCtx.fillRect(c * TILE, r * TILE, TILE, TILE);
+      }
+    }
+    // 小草装饰点缀
+    scratchCtx.fillStyle = 'rgba(255,255,255,0.08)';
+    for (var r2 = 0; r2 < rows; r2++) {
+      for (var c2 = 0; c2 < cols; c2++) {
+        var h = (r2 * 928371 + c2 * 12345) % 7;
+        if (h === 0) {
+          scratchCtx.fillRect(c2 * TILE + 6, r2 * TILE + 22, 3, 6);
+          scratchCtx.fillRect(c2 * TILE + 14, r2 * TILE + 18, 3, 8);
+        }
+      }
+    }
   }
 
   function updateProgress() {
@@ -101,12 +126,16 @@
   // ---------- 输入：键盘 ----------
   window.addEventListener('keydown', function (e) {
     switch (e.key) {
+      case 'ArrowUp': case 'w': case 'W': keys.up = true; break;
+      case 'ArrowDown': case 's': case 'S': keys.down = true; break;
       case 'ArrowLeft': case 'a': case 'A': keys.left = true; break;
       case 'ArrowRight': case 'd': case 'D': keys.right = true; break;
     }
   });
   window.addEventListener('keyup', function (e) {
     switch (e.key) {
+      case 'ArrowUp': case 'w': case 'W': keys.up = false; break;
+      case 'ArrowDown': case 's': case 'S': keys.down = false; break;
       case 'ArrowLeft': case 'a': case 'A': keys.left = false; break;
       case 'ArrowRight': case 'd': case 'D': keys.right = false; break;
     }
@@ -132,21 +161,31 @@
     el.addEventListener('mouseup', release);
     el.addEventListener('mouseleave', release);
   }
+  bindDpadButton(dpad.up, 'up');
+  bindDpadButton(dpad.down, 'down');
   bindDpadButton(dpad.left, 'left');
   bindDpadButton(dpad.right, 'right');
 
   // ---------- 更新逻辑 ----------
   function update(dt) {
-    var dx = 0;
+    var dx = 0, dy = 0;
+    if (keys.up) dy -= 1;
+    if (keys.down) dy += 1;
     if (keys.left) dx -= 1;
     if (keys.right) dx += 1;
 
-    var moving = dx !== 0;
+    var moving = dx !== 0 || dy !== 0;
 
     if (moving) {
+      var len = Math.sqrt(dx * dx + dy * dy);
+      dx /= len; dy /= len;
+      
       car.x += dx * CAR_SPEED * dt;
-      var halfW = CAR_W / 2;
+      car.y += dy * CAR_SPEED * dt;
+      
+      var halfW = CAR_W / 2, halfH = CAR_H / 2;
       car.x = Math.max(halfW, Math.min(W - halfW, car.x));
+      car.y = Math.max(70 + halfH, Math.min(H - halfH - 20, car.y));
       car.animT += dt;
     } else {
       car.animT = 0;
@@ -176,16 +215,21 @@
 
   // ---------- 渲染 ----------
   function drawBackground() {
-    // 土地背景 + "生日快乐"大字
-    ctx.fillStyle = '#a67c52'; // 浅棕色土地
+    // 浅棕色土地背景
+    ctx.fillStyle = '#c4a57b'; // 更浅的棕色土地
     ctx.fillRect(0, 0, W, H);
     
-    // 绘制"生日快乐"四个大字（深棕色）
+    // 绘制"生日快乐"两行大字（深棕色）
     ctx.fillStyle = '#5a3b1f'; // 深棕色
-    ctx.font = 'bold ' + Math.floor(W * 0.15) + 'px sans-serif';
+    var fontSize = Math.floor(Math.min(W * 0.22, H * 0.15));
+    ctx.font = 'bold ' + fontSize + 'px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('生日快乐', W / 2, H * 0.4);
+    
+    // 第一行：生日
+    ctx.fillText('生日', W / 2, H * 0.42);
+    // 第二行：快乐！
+    ctx.fillText('快乐！', W / 2, H * 0.58);
   }
 
   function drawCar() {
@@ -294,7 +338,7 @@
       cancelAnimationFrame(rafId);
       rafId = null;
     }
-    keys.left = keys.right = false;
+    keys.up = keys.down = keys.left = keys.right = false;
   }
 
   // ---------- 按钮事件 ----------

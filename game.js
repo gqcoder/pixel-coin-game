@@ -87,25 +87,68 @@
     updateProgress();
   }
   
-  // 绘制星露谷风格草地遮罩
+  // 绘制星露谷风格草地遮罩：多层绿色块 + 草丛纹理 + 小花点缀
   function drawGrassOverlay() {
     var cols = Math.ceil(W / TILE) + 1;
     var rows = Math.ceil(H / TILE) + 1;
+    // 简单哈希函数，制造伪随机但固定的斑块分布
+    function hash(r, c, mod) {
+      return Math.abs((r * 928371 + c * 12345 + r * c * 7) % mod);
+    }
+
+    // 底色：4 种深浅不同的绿色随机拼接，形成不规则斑块质感
+    var greens = ['#4a9c3f', '#458f3a', '#5cae4c', '#3f8636'];
     for (var r = 0; r < rows; r++) {
       for (var c = 0; c < cols; c++) {
-        var even = (r + c) % 2 === 0;
-        scratchCtx.fillStyle = even ? '#4a9c3f' : '#458f3a';
+        var idx = hash(r, c, 10);
+        var colorIdx;
+        if (idx < 4) colorIdx = 0;
+        else if (idx < 7) colorIdx = 1;
+        else if (idx < 9) colorIdx = 2;
+        else colorIdx = 3;
+        scratchCtx.fillStyle = greens[colorIdx];
         scratchCtx.fillRect(c * TILE, r * TILE, TILE, TILE);
       }
     }
-    // 小草装饰点缀
-    scratchCtx.fillStyle = 'rgba(255,255,255,0.08)';
+
+    // 深色草丛纹理（模拟草叶簇）
     for (var r2 = 0; r2 < rows; r2++) {
       for (var c2 = 0; c2 < cols; c2++) {
-        var h = (r2 * 928371 + c2 * 12345) % 7;
-        if (h === 0) {
-          scratchCtx.fillRect(c2 * TILE + 6, r2 * TILE + 22, 3, 6);
-          scratchCtx.fillRect(c2 * TILE + 14, r2 * TILE + 18, 3, 8);
+        var h2 = hash(r2, c2, 5);
+        var px = c2 * TILE, py = r2 * TILE;
+        if (h2 === 0) {
+          scratchCtx.fillStyle = 'rgba(30,70,25,0.35)';
+          scratchCtx.fillRect(px + 5, py + 20, 4, 8);
+          scratchCtx.fillRect(px + 12, py + 16, 4, 10);
+          scratchCtx.fillRect(px + 20, py + 22, 4, 6);
+        } else if (h2 === 1) {
+          scratchCtx.fillStyle = 'rgba(255,255,255,0.12)';
+          scratchCtx.fillRect(px + 8, py + 8, 3, 5);
+          scratchCtx.fillRect(px + 18, py + 12, 3, 5);
+        }
+      }
+    }
+
+    // 小花点缀（黄色/白色小花，增加生动感）
+    for (var r3 = 0; r3 < rows; r3++) {
+      for (var c3 = 0; c3 < cols; c3++) {
+        var h3 = hash(r3, c3, 17);
+        if (h3 === 0) {
+          var fx = c3 * TILE + 16, fy = r3 * TILE + 16;
+          scratchCtx.fillStyle = '#fff6c9';
+          scratchCtx.beginPath();
+          scratchCtx.arc(fx, fy, 2.5, 0, Math.PI * 2);
+          scratchCtx.fill();
+          scratchCtx.fillStyle = '#f2a33c';
+          scratchCtx.beginPath();
+          scratchCtx.arc(fx, fy, 1, 0, Math.PI * 2);
+          scratchCtx.fill();
+        } else if (h3 === 5) {
+          var fx2 = c3 * TILE + 10, fy2 = r3 * TILE + 24;
+          scratchCtx.fillStyle = '#ffffff';
+          scratchCtx.beginPath();
+          scratchCtx.arc(fx2, fy2, 2, 0, Math.PI * 2);
+          scratchCtx.fill();
         }
       }
     }

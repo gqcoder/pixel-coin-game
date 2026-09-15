@@ -91,21 +91,14 @@
   function drawGrassOverlay() {
     var cols = Math.ceil(W / TILE) + 1;
     var rows = Math.ceil(H / TILE) + 1;
-    // 简单哈希函数，制造伪随机但固定的斑块分布
-    function hash(r, c, mod) {
-      return Math.abs((r * 928371 + c * 12345 + r * c * 7) % mod);
-    }
-
-    // 底色：4 种深浅不同的绿色随机拼接，形成不规则斑块质感
+    
+    // 底色：4 种深浅不同的绿色随机拼接
     var greens = ['#4a9c3f', '#458f3a', '#5cae4c', '#3f8636'];
     for (var r = 0; r < rows; r++) {
       for (var c = 0; c < cols; c++) {
-        var idx = hash(r, c, 10);
-        var colorIdx;
-        if (idx < 4) colorIdx = 0;
-        else if (idx < 7) colorIdx = 1;
-        else if (idx < 9) colorIdx = 2;
-        else colorIdx = 3;
+        // 用位运算制造伪随机颜色选择
+        var seed = (r * 73856093) ^ (c * 19349663);
+        var colorIdx = Math.abs(seed) % 4;
         scratchCtx.fillStyle = greens[colorIdx];
         scratchCtx.fillRect(c * TILE, r * TILE, TILE, TILE);
       }
@@ -114,7 +107,8 @@
     // 深色草丛纹理（模拟草叶簇）
     for (var r2 = 0; r2 < rows; r2++) {
       for (var c2 = 0; c2 < cols; c2++) {
-        var h2 = hash(r2, c2, 5);
+        var seed2 = (r2 * 83492791) ^ (c2 * 49979687);
+        var h2 = Math.abs(seed2) % 5;
         var px = c2 * TILE, py = r2 * TILE;
         if (h2 === 0) {
           scratchCtx.fillStyle = 'rgba(30,70,25,0.35)';
@@ -132,7 +126,8 @@
     // 小花点缀（黄色/白色小花，增加生动感）
     for (var r3 = 0; r3 < rows; r3++) {
       for (var c3 = 0; c3 < cols; c3++) {
-        var h3 = hash(r3, c3, 17);
+        var seed3 = (r3 * 73856093) ^ (c3 * 83492791);
+        var h3 = Math.abs(seed3) % 17;
         if (h3 === 0) {
           var fx = c3 * TILE + 16, fy = r3 * TILE + 16;
           scratchCtx.fillStyle = '#fff6c9';
@@ -228,7 +223,7 @@
       
       var halfW = CAR_W / 2, halfH = CAR_H / 2;
       car.x = Math.max(halfW, Math.min(W - halfW, car.x));
-      car.y = Math.max(70 + halfH, Math.min(H - halfH - 20, car.y));
+      car.y = Math.max(halfH + 10, Math.min(H - halfH - 10, car.y));
       car.animT += dt;
     } else {
       car.animT = 0;

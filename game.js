@@ -258,13 +258,13 @@
     ctx.fillStyle = '#c4a57b'; // 更浅的棕色土地
     ctx.fillRect(0, 0, W, H);
     
-    // 上方：相框 + 图片（稍微靠近生日快乐文字）
+    // 上方：相框 + 图片（紧凑布局）
+    var frameW = Math.min(W * 0.62, H * 0.35); // 相框宽度
+    var frameH = frameW * 0.75; // 相框高度（4:3 比例）
+    var frameX = (W - frameW) / 2; // 居中
+    var frameY = H * 0.08; // 距离顶部 8%
+    
     if (picImage && picImage.complete) {
-      var frameW = Math.min(W * 0.65, H * 0.38); // 相框宽度（稍微缩小）
-      var frameH = frameW * 0.75; // 相框高度（4:3 比例）
-      var frameX = (W - frameW) / 2; // 居中
-      var frameY = H * 0.06; // 距离顶部 6%（往上移，靠近文字）
-      
       // 相框外框（深棕色木纹效果）
       var frameBorder = 12;
       ctx.fillStyle = '#4a2f1a'; // 深棕色木纹
@@ -308,9 +308,10 @@
       ctx.restore();
     }
     
-    // 下方：绘制"生日快乐"气泡文字 + 蛋糕emoji
-    var bubbleY = H * 0.65; // 气泡背景 Y 起始位置
-    var bubbleH = H * 0.30; // 气泡高度（覆盖下半部分）
+    // 计算气泡起始位置（紧贴相框下方，只留20px间距）
+    var frameBottom = frameY + frameH + 24; // 相框底部 + 边框
+    var bubbleY = frameBottom + 20; // 间距缩小到 20px
+    var bubbleH = H - bubbleY - H * 0.05; // 气泡高度（到屏幕底部留5%边距）
     
     // 绘制浅色气泡背景（圆润的米色背景）
     ctx.fillStyle = '#fff5e6'; // 浅米色
@@ -343,27 +344,24 @@
     ctx.fillText('🎈', W * 0.12, bubbleY + bubbleH * 0.3); // 左侧气球
     ctx.fillText('🎈', W * 0.88, bubbleY + bubbleH * 0.3); // 右侧气球
     
-    // 绘制"生日快乐"两行大字（居中，带粉色/红色可爱风格）
-    var fontSize = Math.floor(Math.min(W * 0.18, H * 0.10));
+    // 绘制"生日快乐"两行大字（完全居中对齐）
+    var fontSize = Math.floor(Math.min(W * 0.16, H * 0.09));
     
-    // 使用 emoji 装饰文字（两边加 ✨）
+    // 第一行：生日
     ctx.fillStyle = '#ff6b9d'; // 可爱粉色
     ctx.font = 'bold ' + fontSize + 'px "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.fillText('生日', W / 2, bubbleY + bubbleH * 0.35);
     
-    // 第一行：🎉 生日 🎉
-    ctx.fillText('🎉 生日 🎉', W / 2, bubbleY + bubbleH * 0.32);
-    
-    // 第二行：快乐！🎂
+    // 第二行：快乐
     ctx.fillStyle = '#ff4757'; // 红色喜庆
-    ctx.font = 'bold ' + (fontSize * 1.15) + 'px "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif';
-    ctx.fillText('快乐！🎂', W / 2, bubbleY + bubbleH * 0.65);
+    ctx.font = 'bold ' + fontSize + 'px "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif';
+    ctx.fillText('快乐', W / 2, bubbleY + bubbleH * 0.58);
     
-    // 底部装饰文字
-    ctx.fillStyle = '#ffa502'; // 橙色
-    ctx.font = Math.floor(fontSize * 0.45) + 'px sans-serif';
-    ctx.fillText('✨ 许个愿望吧 ✨', W / 2, bubbleY + bubbleH * 0.88);
+    // 蛋糕 emoji（单独居中放在最下方）
+    ctx.font = (fontSize * 1.2) + 'px sans-serif';
+    ctx.fillText('🎂', W / 2, bubbleY + bubbleH * 0.82);
   }
 
   function drawCar() {

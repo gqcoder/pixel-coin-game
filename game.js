@@ -4,10 +4,10 @@
 
   // ---------- 常量 ----------
   var TILE = 32; // 草地格子像素大小
-  var CAR_SPEED = 180; // px/s
-  var CAR_W = 48; // 小车宽度
-  var CAR_H = 40; // 小车高度
-  var SCRATCH_SIZE = 32; // 刮开区域大小
+  var CAR_SPEED = 200; // px/s（稍微加速）
+  var CAR_W = 56; // 小车宽度（稍微加宽）
+  var CAR_H = 44; // 小车高度
+  var SCRATCH_SIZE = 36; // 刮开区域大小
 
   // ---------- DOM ----------
   var screens = {
@@ -258,12 +258,12 @@
     ctx.fillStyle = '#c4a57b'; // 更浅的棕色土地
     ctx.fillRect(0, 0, W, H);
     
-    // 上方：相框 + 图片（占屏幕上半部分）
+    // 上方：相框 + 图片（稍微靠近生日快乐文字）
     if (picImage && picImage.complete) {
-      var frameW = Math.min(W * 0.7, H * 0.45); // 相框宽度
+      var frameW = Math.min(W * 0.65, H * 0.38); // 相框宽度（稍微缩小）
       var frameH = frameW * 0.75; // 相框高度（4:3 比例）
       var frameX = (W - frameW) / 2; // 居中
-      var frameY = H * 0.15; // 距离顶部 15%
+      var frameY = H * 0.06; // 距离顶部 6%（往上移，靠近文字）
       
       // 相框外框（深棕色木纹效果）
       var frameBorder = 12;
@@ -308,84 +308,222 @@
       ctx.restore();
     }
     
-    // 下方：绘制"生日快乐"两行大字（深棕色）
-    ctx.fillStyle = '#5a3b1f'; // 深棕色
-    var fontSize = Math.floor(Math.min(W * 0.22, H * 0.12));
-    ctx.font = 'bold ' + fontSize + 'px sans-serif';
+    // 下方：绘制"生日快乐"气泡文字 + 蛋糕emoji
+    var bubbleY = H * 0.65; // 气泡背景 Y 起始位置
+    var bubbleH = H * 0.30; // 气泡高度（覆盖下半部分）
+    
+    // 绘制浅色气泡背景（圆润的米色背景）
+    ctx.fillStyle = '#fff5e6'; // 浅米色
+    ctx.beginPath();
+    ctx.roundRect(W * 0.08, bubbleY, W * 0.84, bubbleH, 20);
+    ctx.fill();
+    
+    // 气泡边框（浅粉色）
+    ctx.strokeStyle = '#ffb7c5'; // 粉色边框
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    
+    // 气泡小三角（指向相框方向）
+    ctx.fillStyle = '#fff5e6';
+    ctx.beginPath();
+    ctx.moveTo(W / 2 - 15, bubbleY);
+    ctx.lineTo(W / 2 + 15, bubbleY);
+    ctx.lineTo(W / 2, bubbleY - 15);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#ffb7c5';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // 绘制可爱的装饰元素（气球）
+    var decorSize = Math.floor(Math.min(W * 0.06, 24));
+    ctx.font = decorSize + 'px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🎈', W * 0.12, bubbleY + bubbleH * 0.3); // 左侧气球
+    ctx.fillText('🎈', W * 0.88, bubbleY + bubbleH * 0.3); // 右侧气球
+    
+    // 绘制"生日快乐"两行大字（居中，带粉色/红色可爱风格）
+    var fontSize = Math.floor(Math.min(W * 0.18, H * 0.10));
+    
+    // 使用 emoji 装饰文字（两边加 ✨）
+    ctx.fillStyle = '#ff6b9d'; // 可爱粉色
+    ctx.font = 'bold ' + fontSize + 'px "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // 第一行：生日（屏幕下半部分靠上）
-    ctx.fillText('生日', W / 2, H * 0.72);
-    // 第二行：快乐！（紧贴第一行下方）
-    ctx.fillText('快乐！', W / 2, H * 0.85);
+    // 第一行：🎉 生日 🎉
+    ctx.fillText('🎉 生日 🎉', W / 2, bubbleY + bubbleH * 0.32);
+    
+    // 第二行：快乐！🎂
+    ctx.fillStyle = '#ff4757'; // 红色喜庆
+    ctx.font = 'bold ' + (fontSize * 1.15) + 'px "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif';
+    ctx.fillText('快乐！🎂', W / 2, bubbleY + bubbleH * 0.65);
+    
+    // 底部装饰文字
+    ctx.fillStyle = '#ffa502'; // 橙色
+    ctx.font = Math.floor(fontSize * 0.45) + 'px sans-serif';
+    ctx.fillText('✨ 许个愿望吧 ✨', W / 2, bubbleY + bubbleH * 0.88);
   }
 
   function drawCar() {
     var c = car;
-    var wheelBob = c.animT > 0 ? Math.sin(c.animT * 12) * 2 : 0;
+    var wheelBob = c.animT > 0 ? Math.sin(c.animT * 12) * 3 : 0;
     
     ctx.save();
     ctx.translate(c.x, c.y);
 
     // 车体阴影
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.beginPath();
-    ctx.ellipse(0, CAR_H / 2 + 4, CAR_W / 2 + 4, 6, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, CAR_H / 2 + 6, CAR_W / 2 + 8, 8, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // 车体（像素风小车）
-    ctx.fillStyle = '#d84315'; // 红色车身
-    ctx.fillRect(-CAR_W / 2, -CAR_H / 2 + 10, CAR_W, CAR_H / 2 + 5);
+    // === 可爱像素风小车（参考星露谷风格） ===
     
-    // 车顶
-    ctx.fillStyle = '#bf360c';
-    ctx.fillRect(-CAR_W / 2 + 8, -CAR_H / 2, CAR_W - 16, 12);
+    // 车身底部（深蓝色底座）
+    ctx.fillStyle = '#2e5a88';
+    ctx.fillRect(-CAR_W / 2, 4, CAR_W, 16);
     
-    // 车窗
-    ctx.fillStyle = '#80d8ff';
-    ctx.fillRect(-CAR_W / 2 + 12, -CAR_H / 2 + 2, 12, 8);
-    ctx.fillRect(CAR_W / 2 - 24, -CAR_H / 2 + 2, 12, 8);
+    // 车身主体（天蓝色）
+    ctx.fillStyle = '#5b9bd5';
+    ctx.fillRect(-CAR_W / 2 + 4, -CAR_H / 2 + 8, CAR_W - 8, CAR_H / 2 + 2);
     
-    // 车轮
-    ctx.fillStyle = '#212121';
+    // 车身顶部（浅蓝色渐变）
+    ctx.fillStyle = '#89c4f4';
+    ctx.fillRect(-CAR_W / 2 + 6, -CAR_H / 2 + 6, CAR_W - 12, 8);
+    
+    // 车顶（深蓝色顶棚）
+    ctx.fillStyle = '#3d7ab8';
+    ctx.fillRect(-CAR_W / 2 + 8, -CAR_H / 2, CAR_W - 16, 8);
+    
+    // 车门（两侧）
+    ctx.fillStyle = '#4a8bc7';
+    ctx.fillRect(-CAR_W / 2 + 8, -CAR_H / 2 + 10, CAR_W / 3, 14);
+    ctx.fillRect(CAR_W / 2 - 8 - CAR_W / 3, -CAR_H / 2 + 10, CAR_W / 3, 14);
+    
+    // 车窗（浅蓝色玻璃）
+    ctx.fillStyle = '#b8e0ff';
+    ctx.fillRect(-CAR_W / 2 + 10, -CAR_H / 2 + 12, CAR_W / 3 - 4, 10);
+    ctx.fillRect(CAR_W / 2 - 6 - CAR_W / 3, -CAR_H / 2 + 12, CAR_W / 3 - 4, 10);
+    
+    // 车窗高光
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-CAR_W / 2 + 11, -CAR_H / 2 + 13, 4, 3);
+    ctx.fillRect(CAR_W / 2 - 5 - CAR_W / 3, -CAR_H / 2 + 13, 4, 3);
+    
+    // 车灯（黄色）
+    ctx.fillStyle = '#ffd700';
+    ctx.fillRect(-CAR_W / 2 + 2, -CAR_H / 2 + 14, 4, 6);
+    ctx.fillRect(CAR_W / 2 - 6, -CAR_H / 2 + 14, 4, 6);
+    
+    // 车灯高光
+    ctx.fillStyle = '#fff8dc';
+    ctx.fillRect(-CAR_W / 2 + 2, -CAR_H / 2 + 14, 2, 2);
+    ctx.fillRect(CAR_W / 2 - 6, -CAR_H / 2 + 14, 2, 2);
+    
+    // 前进挡风玻璃（蓝色玻璃效果）
+    ctx.fillStyle = '#87ceeb';
+    ctx.fillRect(-CAR_W / 2 + 10, -CAR_H / 2 + 2, CAR_W - 20, 6);
+    ctx.fillStyle = '#b8e0ff';
+    ctx.fillRect(-CAR_W / 2 + 12, -CAR_H / 2 + 3, CAR_W - 24, 2);
+    
+    // === 车轮（更大更可爱） ===
+    var wheelR = 10;
+    var wheelY = CAR_H / 2 + 4;
+    
+    // 左轮
+    ctx.fillStyle = '#1a1a1a';
     ctx.beginPath();
-    ctx.arc(-CAR_W / 2 + 12, CAR_H / 2 + 8 + wheelBob, 6, 0, Math.PI * 2);
+    ctx.arc(-CAR_W / 2 + 14, wheelY + wheelBob, wheelR, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = '#333';
     ctx.beginPath();
-    ctx.arc(CAR_W / 2 - 12, CAR_H / 2 + 8 - wheelBob, 6, 0, Math.PI * 2);
+    ctx.arc(-CAR_W / 2 + 14, wheelY + wheelBob, wheelR - 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#666';
+    ctx.beginPath();
+    ctx.arc(-CAR_W / 2 + 14, wheelY + wheelBob, wheelR - 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#444';
+    ctx.beginPath();
+    ctx.arc(-CAR_W / 2 + 14, wheelY + wheelBob, 2, 0, Math.PI * 2);
     ctx.fill();
     
-    // 车轮轮毂
-    ctx.fillStyle = '#757575';
+    // 右轮
+    ctx.fillStyle = '#1a1a1a';
     ctx.beginPath();
-    ctx.arc(-CAR_W / 2 + 12, CAR_H / 2 + 8 + wheelBob, 3, 0, Math.PI * 2);
+    ctx.arc(CAR_W / 2 - 14, wheelY - wheelBob, wheelR, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = '#333';
     ctx.beginPath();
-    ctx.arc(CAR_W / 2 - 12, CAR_H / 2 + 8 - wheelBob, 3, 0, Math.PI * 2);
+    ctx.arc(CAR_W / 2 - 14, wheelY - wheelBob, wheelR - 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#666';
+    ctx.beginPath();
+    ctx.arc(CAR_W / 2 - 14, wheelY - wheelBob, wheelR - 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#444';
+    ctx.beginPath();
+    ctx.arc(CAR_W / 2 - 14, wheelY - wheelBob, 2, 0, Math.PI * 2);
     ctx.fill();
     
-    // 小人（坐在车上）
-    var skinColor = '#f2c48c';
-    var hairColor = '#5a3b1f';
-    var bodyColor = '#3a6fb0';
+    // === 车上可爱小人 ===
+    var skinColor = '#ffd5b8';
+    var hairColor = '#8b4513';
+    var bodyColor = '#ff6b9d'; // 粉色上衣
+    var shortsColor = '#5b9bd5'; // 蓝色短裤
     
     // 头部
     ctx.fillStyle = skinColor;
-    ctx.fillRect(-6, -CAR_H / 2 - 14, 12, 12);
+    ctx.fillRect(-8, -CAR_H / 2 - 20, 16, 14);
     
-    // 头发
+    // 头发（可爱刘海）
     ctx.fillStyle = hairColor;
-    ctx.fillRect(-6, -CAR_H / 2 - 16, 12, 4);
+    ctx.fillRect(-8, -CAR_H / 2 - 24, 16, 6);
+    ctx.fillRect(-10, -CAR_H / 2 - 20, 4, 8); // 左边刘海
+    ctx.fillRect(6, -CAR_H / 2 - 20, 4, 8); // 右边刘海
     
-    // 眼睛
-    ctx.fillStyle = '#2b1d0e';
-    ctx.fillRect(-4, -CAR_H / 2 - 10, 2, 2);
-    ctx.fillRect(2, -CAR_H / 2 - 10, 2, 2);
+    // 眼睛（可爱圆眼）
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(-4, -CAR_H / 2 - 14, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(4, -CAR_H / 2 - 14, 2.5, 0, Math.PI * 2);
+    ctx.fill();
     
-    // 身体
+    // 眼睛高光
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(-5, -CAR_H / 2 - 15, 1.5, 1.5);
+    ctx.fillRect(3, -CAR_H / 2 - 15, 1.5, 1.5);
+    
+    // 腮红（可爱）
+    ctx.fillStyle = 'rgba(255,150,150,0.4)';
+    ctx.fillRect(-7, -CAR_H / 2 - 11, 3, 2);
+    ctx.fillRect(4, -CAR_H / 2 - 11, 3, 2);
+    
+    // 嘴巴（微笑）
+    ctx.fillStyle = '#e57373';
+    ctx.fillRect(-3, -CAR_H / 2 - 9, 6, 2);
+    
+    // 身体（粉色上衣）
     ctx.fillStyle = bodyColor;
-    ctx.fillRect(-8, -CAR_H / 2 - 2, 16, 12);
+    ctx.fillRect(-10, -CAR_H / 2 - 6, 20, 12);
+    
+    // 短裤
+    ctx.fillStyle = shortsColor;
+    ctx.fillRect(-10, -CAR_H / 2 + 4, 20, 6);
+    
+    // 手臂
+    ctx.fillStyle = skinColor;
+    ctx.fillRect(-14, -CAR_H / 2 - 4, 4, 8);
+    ctx.fillRect(10, -CAR_H / 2 - 4, 4, 8);
+    
+    // 举起的手（小手）
+    ctx.fillStyle = skinColor;
+    ctx.fillRect(-14, -CAR_H / 2 - 8, 4, 4);
+    ctx.fillRect(10, -CAR_H / 2 - 8, 4, 4);
     
     ctx.restore();
   }
